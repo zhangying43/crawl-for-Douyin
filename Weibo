@@ -1,0 +1,27 @@
+#!pip selenium #如果还没有下载selenium包，请先下载
+import csv
+import pandas as pd
+from selenium.common.exceptions import NoSuchElementException
+from selenium import webdriver
+import time
+
+driver=webdriver.Chrome()#这里以Chrome浏览器为例，如果这一步报错，需要先将selenium的pin文档的位置添加到路径（百度搜索一下如何添加路径）
+driver.get('https://m.weibo.cn/6020329578/4371417258666176')#输入想要爬取评论的帖子的网址，建议使用手机微博搜索该帖子然后将链接复制后在电脑端打开
+
+driver.add_cookie({'name':'SUB','domain':'.weibo.cn','value':'_2A25PEKLlDeRhGeBO4lEY9SzPyDmIHXVs-s6trDV6PUJbkdCOLUrikW1NRY6ZkgKuWpThLZo3LbBcJvAK5eMmklvC'})#模拟登录状态，因为微博不登陆只能查看10条评论
+
+driver.refresh()#让页面刷新一下，因为有时候不刷新页面会刷不出评论
+time.sleep(5)
+result=[]
+
+for cunt in range(1,1000): #爬1000条评论，如果需要更多，就改数字即可
+    try:
+        a=driver.find_element_by_xpath('/html/body/div/div[1]/div/div[4]/div[2]/div['+str(cunt)+']/div/div/div/div/div[2]/div[1]/div/div/h3')#手机微博网址的用户评论就是这个路径，如果需要爬取其他内容需要添加其他路径
+        time.sleep(1)
+        result.append(a.text)
+        print(a.text)
+        driver.execute_script('window.scrollBy(0,300)')#让屏幕每秒往下拉多少个像素点
+    except NoSuchElementException:#如果评论是纯表情包就会报错，通过此去跳过
+        print('miss')
+text=pd.DataFrame({'content':result})
+text.to_excel('赖冠霖.xlsx')  #保存到excel
