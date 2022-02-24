@@ -1,0 +1,23 @@
+#如果没有下载selenium包请先下载然后将bin文档配置到路径下
+import csv
+import pandas as pd
+from selenium.common.exceptions import NoSuchElementException
+from selenium import webdriver
+import time
+
+
+driver=webdriver.Chrome()#以chrome浏览器为例
+driver.get('https://www.douyin.com/video/6935365422212517127')#输入想要爬取的抖音帖子的网址
+time.sleep(5)
+result=[]
+for cunt in range(1,2000):#这里选择爬取2000条评论    
+    try:
+        a=driver.find_element_by_xpath('/html/body/div[1]/div/div[2]/div/div/div[1]/div[3]/div/div/div[4]/div['+str(cunt)+']/div/div[2]/p/span/span/span/span/span/span')#这里爬取的是抖音单篇帖子的评论，如果还要爬取其他内容得增加xpath路径
+        time.sleep(1)
+        result.append(a.text)
+        print(a.text)
+        driver.execute_script('window.scrollBy(0,200)')#每秒让浏览器向下拉200个像素
+    except NoSuchElementException:#如果有评论是纯表情包会找不到，所以跳过报错
+        print('miss')
+text=pd.DataFrame({'content':result})
+text.to_excel('liuyunxi.xlsx')  #保存成为excel
